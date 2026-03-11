@@ -2,13 +2,27 @@
 """
 Football Stats MCP Server - ESPN API
 Herramientas para analizar estadísticas de fútbol sin necesidad de Chrome.
+
+Modos de uso:
+  python3 mcp_server.py            -> stdio (Claude Code local)
+  python3 mcp_server.py http       -> HTTP/SSE en 0.0.0.0:8000
+  python3 mcp_server.py http 9000  -> HTTP/SSE en puerto personalizado
 """
 
+import sys
 from datetime import datetime, timezone, timedelta
 from curl_cffi import requests as creq
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("football-stats")
+# Detectar modo HTTP desde args para configurar host/port en el constructor
+_http_mode = len(sys.argv) > 1 and sys.argv[1] == "http"
+_port = int(sys.argv[2]) if _http_mode and len(sys.argv) > 2 else 8000
+
+mcp = FastMCP(
+    "football-stats",
+    host="0.0.0.0" if _http_mode else "127.0.0.1",
+    port=_port,
+)
 
 BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer"
 
@@ -312,4 +326,8 @@ def analyze_match(league: str, home_team: str, away_team: str, num_matches: int 
 
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    if _http_mode:
+        print(f"Football Stats MCP corriendo en http://0.0.0.0:{_port}/sse")
+        mcp.run(transport="sse")
+    else:
+        mcp.run(transport="stdio")

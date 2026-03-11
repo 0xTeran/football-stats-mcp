@@ -23,23 +23,33 @@ MCP server para análisis de estadísticas de fútbol orientado a apuestas depor
 
 ## Ligas soportadas
 
-- England Premier League
-- Spain La Liga
-- Germany Bundesliga
-- Italy Serie A
-- France Ligue 1
-- UEFA Champions League
-- UEFA Europa League
-- Argentina Liga Profesional
-- USA MLS
-- Portugal Primeira Liga
-- Netherlands Eredivisie
-- Mexico Liga MX
-- Brazil Serie A
-- Colombia Liga BetPlay
-- Chile Primera Division
+- England Premier League · Spain La Liga · Germany Bundesliga
+- Italy Serie A · France Ligue 1
+- UEFA Champions League · UEFA Europa League
+- Argentina Liga Profesional · USA MLS · Brazil Serie A
+- Portugal Primeira Liga · Netherlands Eredivisie
+- Mexico Liga MX · Colombia Liga BetPlay · Chile Primera Division
 
-## Instalación
+---
+
+## Opción A — Conectar al servidor remoto (sin instalar nada)
+
+Agrega esto a `~/.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "football-stats": {
+      "type": "sse",
+      "url": "http://TU_SERVIDOR_IP:8000/sse"
+    }
+  }
+}
+```
+
+---
+
+## Opción B — Instalar local (stdio)
 
 ### Requisitos
 
@@ -48,8 +58,6 @@ pip install curl-cffi mcp rich
 ```
 
 ### Configurar en Claude Code
-
-Agrega esto a `~/.claude/settings.json`:
 
 ```json
 {
@@ -62,17 +70,33 @@ Agrega esto a `~/.claude/settings.json`:
 }
 ```
 
-### Ejecutar el bot interactivo
+---
+
+## Correr el servidor HTTP/SSE propio
+
+```bash
+# Puerto 8000 (default)
+python3 mcp_server.py http
+
+# Puerto personalizado
+python3 mcp_server.py http 9000
+```
+
+El servidor quedará escuchando en `http://0.0.0.0:8000/sse`.
+
+---
+
+## Bot interactivo en terminal
 
 ```bash
 python3 bot.py
-# Opcional: pasar número de partidos a analizar
+# Opcional: número de partidos históricos
 python3 bot.py 7
 ```
 
-## Uso como MCP en Claude
+---
 
-Una vez configurado, puedes pedir directamente en Claude:
+## Uso como MCP en Claude
 
 ```
 Analiza el partido Manchester City vs Arsenal en la Premier League
@@ -85,6 +109,12 @@ Dame los próximos partidos de Champions League
 ```
 ¿Cuántos corners promedia el Real Madrid en los últimos 5 partidos?
 ```
+
+```
+Muestra los tiros del partido ID:401862583 de Champions League
+```
+
+---
 
 ## Ejemplo de salida
 
@@ -105,17 +135,19 @@ TOP TIRADORES:
   Phil Foden: 2.1 tiros/pj (1.2 a puerta, 1 goles)
 ```
 
+---
+
 ## Fuente de datos
 
-Usa la API pública de **ESPN** (`site.api.espn.com`). No requiere API key, no requiere Chrome.
+API pública de **ESPN** (`site.api.espn.com`). No requiere API key ni Chrome.
 
-> **Nota:** xG (expected goals) no está disponible en ESPN. Para datos más avanzados se puede extender con otras fuentes.
+> xG (expected goals) no está disponible en ESPN.
 
 ## Archivos
 
 ```
 football-stats-mcp/
-├── mcp_server.py   # Servidor MCP (usar con Claude Code)
+├── mcp_server.py   # Servidor MCP (stdio + HTTP/SSE)
 ├── bot.py          # Bot interactivo en terminal
 └── requirements.txt
 ```
